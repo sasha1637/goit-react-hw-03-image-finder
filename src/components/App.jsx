@@ -6,7 +6,7 @@ import { Button } from './Button/Button';
 import toast, { Toaster } from 'react-hot-toast';
 import { Modal } from './Modal/Modal';
 import { Wrapper } from './App.styled';
-import HeadBodyGrid from './Loader/Loader';
+import { Grid } from 'react-loader-spinner';
 export class App extends Component {
   state = {
     page: 1,
@@ -21,36 +21,45 @@ export class App extends Component {
   onSearchQuery = evt => {
     evt.preventDefault();
     const { value } = evt.target.elements.search;
-    this.setState({ searchQuery: value, page: 1 });
+    if (value.trim() === '') {
+      return toast('Упс( Пустой запрос ');
+    }
+    this.setState({
+      searchQuery: value,
+      page: 1,
+      galleryImages: [],
+      totalImages: 0,
+    });
   };
   async componentDidUpdate(_, prevState) {
-    const { searchQuery, page } = this.state;
+    const { searchQuery } = this.state;
     if (prevState.searchQuery !== searchQuery) {
-      this.setState({ galleryImages: [] });
-    }
-    if (prevState.searchQuery !== searchQuery || prevState.page !== page) {
-      try {
-        this.setState({ isLoading: true });
-        const data = await searchImage(searchQuery, page);
-        if (data.hits.length > 0) {
-          this.setState(({ galleryImages }) => ({
-            galleryImages: [...galleryImages, ...data.hits],
-            totalImages: data.totalHits,
-          }));
-        } else {
-          toast('Неудачный поиск, сделайте повторный запрос');
-          this.setState({ galleryImages: [], totalImages: 0 });
-        }
-      } catch (error) {
-        toString('Упс(: Что-то пошло не так перезагрузите страницу');
-        console.log(error);
-      } finally {
-        this.setState({ isLoading: false });
-      }
+      this.fetchImage();
     }
   }
+  fetchImage = async () => {
+    const { searchQuery, page } = this.state;
+    this.setState({ isLoading: true });
+    try {
+      const data = await searchImage(searchQuery, page);
+      if (data.totalHits > 0) {
+        this.setState(({ galleryImages }) => ({
+          galleryImages: [...galleryImages, ...data.hits],
+          totalImages: data.totalHits,
+        }));
+      } else {
+        toast('Неудачный поиск, сделайте повторный запрос');
+        this.setState({ galleryImages: [], totalImages: 0 });
+      }
+    } catch (error) {
+      toString('Упс(: Что-то пошло не так перезагрузите страницу');
+    } finally {
+      this.setState({ isLoading: false });
+    }
+  };
   onLoadMore = () => {
     this.setState(prevState => ({ page: prevState.page + 1 }));
+    this.fetchImage();
     this.scrollPage();
   };
   onToggleModal = () => {
@@ -63,27 +72,51 @@ export class App extends Component {
       this.onToggleModal();
     }
   };
+  scrollPage = () => {
+    setTimeout(() => {
+      window.scrollBy({
+        top: document.documentElement.clientHeight - 150,
+        behavior: 'smooth',
+      });
+    }, 250);
+  };
   render() {
+    const {
+      showModal,
+      largeImageURL,
+      imageAlt,
+      galleryImages,
+      totalImages,
+      isLoading,
+    } = this.state;
+    const showLoadMore = galleryImages.length < totalImages;
     return (
       <Wrapper>
         <Toaster />
-        {this.state.showModal && (
-          <Modal onToggleModal={this.onToggleModal}>
-            <img src={this.state.largeImageURL} alt={this.state.imageAlt} />
-          </Modal>
+        <Searchbar onSubmit={this.onSearchQuery} />
+        {isLoading ? (
+          <Grid
+            height="300"
+            width="300"
+            color="blue"
+            ariaLabel="grid-loading"
+            radius="12.5"
+            wrapperStyle={{ display: 'block', margin: '0 auto' }}
+          />
+        ) : (
+          <>
+            <ImageGallery
+              onClick={this.onOpenModal}
+              images={galleryImages}
+            ></ImageGallery>
+            {showLoadMore && <Button onClick={this.onLoadMore} />}
+          </>
         )}
 
-        <Searchbar onSubmit={this.onSearchQuery} />
-        {this.state.isLoading ? (
-          <HeadBodyGrid></HeadBodyGrid>
-        ) : (
-          <ImageGallery
-            onClick={this.onOpenModal}
-            images={this.state.galleryImages}
-          ></ImageGallery>
-        )}
-        {this.state.galleryImages.length < this.state.totalImages && (
-          <Button onClick={this.onLoadMore} />
+        {showModal && (
+          <Modal onToggleModal={this.onToggleModal}>
+            <img src={largeImageURL} alt={imageAlt} />
+          </Modal>
         )}
       </Wrapper>
     );
