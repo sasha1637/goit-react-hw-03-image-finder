@@ -37,7 +37,6 @@ export class App extends Component {
             galleryImages: [...galleryImages, ...data.hits],
             totalImages: data.totalHits,
           }));
-          this.setState({ isLoading: false });
         } else {
           toast('Неудачный поиск, сделайте повторный запрос');
           this.setState({ galleryImages: [], totalImages: 0 });
@@ -45,6 +44,8 @@ export class App extends Component {
       } catch (error) {
         toString('Упс(: Что-то пошло не так перезагрузите страницу');
         console.log(error);
+      } finally {
+        this.setState({ isLoading: false });
       }
     }
   }
