@@ -9,7 +9,7 @@ import { Wrapper } from './App.styled';
 import { Grid } from 'react-loader-spinner';
 export class App extends Component {
   state = {
-    page: null,
+    page: 1,
     searchQuery: '',
     isLoading: false,
     galleryImages: [],
@@ -32,6 +32,7 @@ export class App extends Component {
   };
   componentDidUpdate(_, prevState) {
     const { searchQuery, page } = this.state;
+
     if (prevState.searchQuery !== searchQuery || prevState.page !== page) {
       this.fetchImage();
     }
