@@ -1,9 +1,6 @@
 import axios from 'axios';
 // axios.defaults.baseURL = 'https://pixabay.com/api/';
-export const searchImage = async (
-  searchQuery = 'yellow + flowers',
-  page = 1
-) => {
+export const searchImage = async (searchQuery, page = 1) => {
   const response = await axios.get('https://pixabay.com/api/', {
     params: {
       image_type: 'photo',

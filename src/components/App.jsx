@@ -9,12 +9,11 @@ import { Wrapper } from './App.styled';
 import { Grid } from 'react-loader-spinner';
 export class App extends Component {
   state = {
-    page: 1,
+    page: null,
     searchQuery: '',
     isLoading: false,
     galleryImages: [],
     largeImageURL: '',
-    imageAlt: '',
     totalImages: 0,
     showModal: false,
   };
@@ -31,9 +30,9 @@ export class App extends Component {
       totalImages: 0,
     });
   };
-  async componentDidUpdate(_, prevState) {
-    const { searchQuery } = this.state;
-    if (prevState.searchQuery !== searchQuery) {
+  componentDidUpdate(_, prevState) {
+    const { searchQuery, page } = this.state;
+    if (prevState.searchQuery !== searchQuery || prevState.page !== page) {
       this.fetchImage();
     }
   }
@@ -49,7 +48,6 @@ export class App extends Component {
         }));
       } else {
         toast('Неудачный поиск, сделайте повторный запрос');
-        this.setState({ galleryImages: [], totalImages: 0 });
       }
     } catch (error) {
       toString('Упс(: Что-то пошло не так перезагрузите страницу');
@@ -59,8 +57,6 @@ export class App extends Component {
   };
   onLoadMore = () => {
     this.setState(prevState => ({ page: prevState.page + 1 }));
-    this.fetchImage();
-    this.scrollPage();
   };
   onToggleModal = () => {
     this.setState({ showModal: !this.state.showModal });
@@ -71,14 +67,6 @@ export class App extends Component {
       this.setState({ largeImageURL: largeImageURL });
       this.onToggleModal();
     }
-  };
-  scrollPage = () => {
-    setTimeout(() => {
-      window.scrollBy({
-        top: document.documentElement.clientHeight - 150,
-        behavior: 'smooth',
-      });
-    }, 250);
   };
   render() {
     const {
