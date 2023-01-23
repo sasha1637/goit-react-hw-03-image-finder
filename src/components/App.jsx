@@ -83,6 +83,11 @@ export class App extends Component {
       <Wrapper>
         <Toaster />
         <Searchbar onSubmit={this.onSearchQuery} />
+        <ImageGallery
+          onClick={this.onOpenModal}
+          images={galleryImages}
+        ></ImageGallery>
+        {showLoadMore && <Button onClick={this.onLoadMore} />}
         {isLoading ? (
           <Grid
             height="300"
@@ -92,16 +97,7 @@ export class App extends Component {
             radius="12.5"
             wrapperStyle={{ display: 'block', margin: '0 auto' }}
           />
-        ) : (
-          <>
-            <ImageGallery
-              onClick={this.onOpenModal}
-              images={galleryImages}
-            ></ImageGallery>
-            {showLoadMore && <Button onClick={this.onLoadMore} />}
-          </>
-        )}
-
+        ) : null}
         {showModal && (
           <Modal onToggleModal={this.onToggleModal}>
             <img src={largeImageURL} alt={imageAlt} />
