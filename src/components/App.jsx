@@ -43,8 +43,8 @@ export class App extends Component {
     try {
       const data = await searchImage(searchQuery, page);
       if (data.totalHits > 0) {
-        this.setState(({ galleryImages }) => ({
-          galleryImages: [...galleryImages, ...data.hits],
+        this.setState(prevState => ({
+          galleryImages: [...prevState.galleryImages, ...data.hits],
           totalImages: data.totalHits,
         }));
       } else {
